@@ -7,13 +7,22 @@ namespace Task1.Polynomial {
     public class Polynomial {
 
         #region Public Fields
+        /// <summary>
+        /// Polynomial's degree <remarks>The maximum degree of a variable</remarks>
+        /// </summary>
         public int Degree { get; }
         #endregion
 
         #region Private Fields
         private readonly int[] m_CoefficientArray;
 
-        private int this[int index] => m_CoefficientArray[index];
+        private int this[int index] {
+            get {
+                if(index < 0 || index > Degree)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                return m_CoefficientArray[index];
+            }
+        } 
 
         #endregion
 
@@ -26,7 +35,6 @@ namespace Task1.Polynomial {
                 Degree = 0;
                 return;
             }
-
 
             m_CoefficientArray = new int[coefficientArray.Length];
             for (int i = 0; i < coefficientArray.Length; i++)
