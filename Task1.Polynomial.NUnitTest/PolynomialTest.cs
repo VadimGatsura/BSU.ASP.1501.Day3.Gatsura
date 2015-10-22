@@ -99,10 +99,18 @@ namespace Task1.Polynomial.NUnitTest {
             get {
                 yield return new TestCaseData(new Polynomial(new[] { 0, 4, 3 }), 5, 3).Returns(new Polynomial(new[] { 0, 0, 0, 0, 20, 15 }));
                 yield return new TestCaseData(new Polynomial(new[] { 0, 4, 3 }), -5, 3).Returns(new Polynomial(new[] { 0, 0, 0, 0, -20, -15 }));
-                //yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), -10, 5).Returns(new Polynomial(new[] { 1, 2, 3, 4, 0, -10 }));
             }
         }
         [Test, TestCaseSource(nameof(MultiplyMonomialDatas))]
-        public Polynomial MultuplyMonomial_Test(Polynomial a, int coeff, int degree) => a.Multiply(coeff, degree);
+        public Polynomial MultiplyMonomial_Test(Polynomial a, int coeff, int degree) => a.Multiply(coeff, degree);
+
+        public IEnumerable<TestCaseData> CalculateDatas {
+            get {
+                yield return new TestCaseData(new Polynomial(new[] { 0, 4, 3 }), 5).Returns(95);
+                yield return new TestCaseData(new Polynomial(new[] { 0, 4, 3 }), -5).Returns(55);
+            }
+        }
+        [Test, TestCaseSource(nameof(CalculateDatas))]
+        public double CalculatePolynomial_Test(Polynomial a, double variable) => a.Calculate(variable);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Task1.Polynomial {
@@ -77,6 +78,19 @@ namespace Task1.Polynomial {
             unchecked {
                 return m_CoefficientArray.Aggregate(17, (current, item) => current * 23 + item.GetHashCode());
             }
+        }
+
+        /// <summary>
+        /// Calculate the value of a polynomial, if the variable is value
+        /// </summary>
+        /// <param name="value">Polynomial's variable</param>
+        /// <returns>Value of polynomial</returns>
+        public double Calculate(double value) {
+            double result = 0;
+            for( int i = 0; i <= Degree; i++ ) 
+                result += Math.Pow(value, i) * this[ i ];
+            
+            return result;
         }
 
         /// <summary>
