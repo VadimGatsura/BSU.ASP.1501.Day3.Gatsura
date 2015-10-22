@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Task1.Polynomial {
@@ -198,26 +197,7 @@ namespace Task1.Polynomial {
         /// <param name="a">The minuend</param>
         /// <param name="b">The subtrahend</param>
         /// <returns></returns>
-        public static Polynomial Subtraction(Polynomial a, Polynomial b) {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a));
-            if (b == null)
-                throw new ArgumentNullException(nameof(b));
-
-            int newDegree = Math.Max(a.Degree, b.Degree);
-            int[] tempArray = new int[newDegree + 1];
-
-            for (int i = 0; i <= newDegree; i++) {
-                if (i <= a.Degree && i <= b.Degree)
-                    tempArray[i] = a[i] - b[i];
-                else if (i <= a.Degree)
-                    tempArray[i] = 0 - b[i];
-                else if (i <= b.Degree)
-                    tempArray[i] = a[i];
-
-            }
-            return new Polynomial(tempArray);
-        }
+        public static Polynomial Subtraction(Polynomial a, Polynomial b) => a + (-b);
 
         /// <summary>
         /// Multiplies two polynomials
@@ -278,6 +258,16 @@ namespace Task1.Polynomial {
         public static bool operator !=(Polynomial a, Polynomial b) => !(a == b);
 
         public static Polynomial operator +(Polynomial a, Polynomial b) => Add(a, b);
+
+        public static Polynomial operator -(Polynomial a) {
+            if(a == null)
+                throw new ArgumentNullException(nameof(a));
+            int[] tempArray = new int[a.Degree + 1];
+            for( int i = 0; i <= a.Degree; i++)
+                tempArray[ i ] = a[ i ] * (-1);
+            
+            return new Polynomial(tempArray);
+        }
 
         public static Polynomial operator -(Polynomial a, Polynomial b) => Subtraction(a, b);
 
