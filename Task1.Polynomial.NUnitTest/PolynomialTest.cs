@@ -17,7 +17,6 @@ namespace Task1.Polynomial.NUnitTest {
 
         public IEnumerable<TestCaseData> ExceptionTestDatas {
             get {
-                yield return new TestCaseData(new int[] { }).Throws(typeof(ArgumentException));
                 yield return new TestCaseData(null).Throws(typeof(ArgumentNullException));
             }
         }
@@ -83,6 +82,13 @@ namespace Task1.Polynomial.NUnitTest {
         [Test, TestCaseSource(nameof(AddMonomialDatas))]
         public Polynomial AddMonomial_Test(Polynomial a, int coeff, int degree) => a.Add(coeff, degree);
 
+        public IEnumerable<TestCaseData> SubDatas {
+            get {
+                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), new Polynomial(new[] { 1, 0, -2 })).Returns(new Polynomial(new[] { 0, 2, 5, 4 }));
+                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), new Polynomial(new[] { 0, 0, 0, 0, 5 })).Returns(new Polynomial(new[] { 1, 2, 3, 4, -5 }));
+            }
+        }
+        [Test, TestCaseSource(nameof(SubDatas))]
         public Polynomial Sub_Test(Polynomial a, Polynomial b)  => a - b;
 
         public IEnumerable<TestCaseData> MultiplyDatas {
