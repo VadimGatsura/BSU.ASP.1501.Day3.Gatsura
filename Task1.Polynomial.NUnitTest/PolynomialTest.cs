@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using NUnit.Framework;
 
 namespace Task1.Polynomial.NUnitTest {
@@ -9,8 +8,8 @@ namespace Task1.Polynomial.NUnitTest {
 
         public IEnumerable<TestCaseData> TestDatas {
             get {
-                yield return new TestCaseData(new[] { 1 }).Returns($"Polynomial: 1");
-                yield return new TestCaseData(new[] { 1, 2, 3, 4 }).Returns($"Polynomial: 4*X^(3) + 3*X^(2) + 2*X^(1) + 1");
+                yield return new TestCaseData(new[] { 1 }).Returns("Polynomial: 1");
+                yield return new TestCaseData(new[] { 1, 2, 3, 4 }).Returns("Polynomial: 4*X^(3) + 3*X^(2) + 2*X^(1) + 1");
             }
         }
         [Test, TestCaseSource(nameof(TestDatas))]
@@ -68,15 +67,42 @@ namespace Task1.Polynomial.NUnitTest {
 
         public IEnumerable<TestCaseData> AddThreeDatas {
             get {
-                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), new Polynomial(new[] { 1, 0, -2 })).Returns(new Polynomial(new[] { 2, 2, 1, 4 }));
-                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), new Polynomial(new[] { 0, 0, 0, 0, 5 })).Returns(new Polynomial(new[] { 1, 2, 3, 4, 5 }));
+                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), new Polynomial(new[] { 1, 0, -2 }), new Polynomial(new[] { 1, 0, -2 })).Returns(new Polynomial(new[] { 3, 2, -1, 4 }));
+                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), new Polynomial(new[] { 1, 0, -2 }),  new Polynomial(new[] { 0, 0, 0, 0, 5 })).Returns(new Polynomial(new[] { 2, 2, 1, 4, 5 }));
             }
         }
-        [Test, TestCaseSource(nameof(AddTwoDatas))]
+        [Test, TestCaseSource(nameof(AddThreeDatas))]
         public Polynomial Add_ThreeArgs_Test(Polynomial a, Polynomial b, Polynomial c) => Polynomial.Add(a, b, c);
+
+        public IEnumerable<TestCaseData> AddMonomialDatas {
+            get {
+                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), 2, 0).Returns(new Polynomial(new[] { 3, 2, 3, 4 }));
+                yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), -10, 5).Returns(new Polynomial(new[] { 1, 2, 3, 4, 0, -10 }));
+            }
+        }
+        [Test, TestCaseSource(nameof(AddMonomialDatas))]
+        public Polynomial AddMonomial_Test(Polynomial a, int coeff, int degree) => a.Add(coeff, degree);
 
         public Polynomial Sub_Test(Polynomial a, Polynomial b)  => a - b;
 
-        public Polynomial Multiply_Test(params Polynomial[] array) => Polynomial.Multiply(array);
+        public IEnumerable<TestCaseData> MultiplyDatas {
+            get {
+                yield return new TestCaseData(new Polynomial(new[] { 0, 9, 2 }), new Polynomial(new[] {4, 3})).Returns(new Polynomial(new[] { 0, 36, 35, 6}));
+                yield return new TestCaseData(new Polynomial(new[] { -1, 9, 2 }), new Polynomial(new [] {2, 1, 5 })).Returns(new Polynomial(new[] { -2, 17, 8, 47, 10 }));
+                //yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), -10, 5).Returns(new Polynomial(new[] { 1, 2, 3, 4, 0, -10 }));
+            }
+        }
+        [Test, TestCaseSource(nameof(MultiplyDatas))]
+        public Polynomial Multiply_Test(Polynomial a, Polynomial b) => Polynomial.Multiply(a, b);
+
+        public IEnumerable<TestCaseData> MultiplyMonomialDatas {
+            get {
+                yield return new TestCaseData(new Polynomial(new[] { 0, 4, 3 }), 5, 3).Returns(new Polynomial(new[] { 0, 0, 0, 0, 20, 15 }));
+                yield return new TestCaseData(new Polynomial(new[] { 0, 4, 3 }), -5, 3).Returns(new Polynomial(new[] { 0, 0, 0, 0, -20, -15 }));
+                //yield return new TestCaseData(new Polynomial(new[] { 1, 2, 3, 4 }), -10, 5).Returns(new Polynomial(new[] { 1, 2, 3, 4, 0, -10 }));
+            }
+        }
+        [Test, TestCaseSource(nameof(MultiplyMonomialDatas))]
+        public Polynomial MultuplyMonomial_Test(Polynomial a, int coeff, int degree) => a.Multiply(coeff, degree);
     }
 }
