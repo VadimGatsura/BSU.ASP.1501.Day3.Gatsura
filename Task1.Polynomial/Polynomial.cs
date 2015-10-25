@@ -4,19 +4,48 @@ using System.Linq;
 using System.Text;
 
 namespace Task1.Polynomial {
-    public class Polynomial {
+    public sealed class Polynomial {
+
+        #region Static Members
+
+        private static double Epsilon { get; }
+
+        static Polynomial() {
+            //double epsilon;
+            //Epsilon = double.TryParse(System.Configuration.ConfigurationManager.AppSettings["epsilon"], out epsilon) ? epsilon : double.Epsilon; //NEED EXE Application
+            Epsilon = 0.000001;
+        }
+
+        private static double[] NormalizePolynomialArray(double[] array) {
+            int size = 0;
+            for (int i = array.Length - 1; i >= 0; i--) {
+                if (Math.Abs(array[i]) > Epsilon) {
+                    size = i + 1;
+                    break;
+                }
+            }
+
+            double[] destArray = new double[size];
+            Array.Copy(array, destArray, size);
+            return destArray;
+
+        }
+
+        #endregion
+
+        #region Instance members
 
         #region Public Fields
         /// <summary>
-        /// Polynomial's degree <remarks>The maximum degree of a variable</remarks>
+        /// Polynomial's degree <remarks>The maximum degree of lhs variable</remarks>
         /// </summary>
         public int Degree { get; }
         #endregion
 
         #region Private Fields
-        private readonly int[] m_CoefficientArray;
+        private readonly double[] m_CoefficientArray;
 
-        private int this[int index] {
+        private double this[int index] {
             get {
                 if(index < 0 || index > Degree)
                     throw new ArgumentOutOfRangeException(nameof(index));
@@ -27,39 +56,24 @@ namespace Task1.Polynomial {
         #endregion
 
         #region Constructors
-        public Polynomial(int[] coefficientArray) {
+
+        public Polynomial(double[] coefficientArray) {
             if (coefficientArray == null)
                 throw new ArgumentNullException(nameof(coefficientArray));
-            if( coefficientArray.Length == 0 ) {
-                m_CoefficientArray = new[] {0};
+
+            double[] tempArray = NormalizePolynomialArray(coefficientArray);
+            if(tempArray.Length == 0 ) {
+                m_CoefficientArray = new[] {.0};
                 Degree = 0;
                 return;
             }
+            m_CoefficientArray = new double[tempArray.Length];
+            for (int i = 0; i < tempArray.Length; i++)
+                m_CoefficientArray[i] = tempArray[i];
 
-            m_CoefficientArray = new int[coefficientArray.Length];
-            for (int i = 0; i < coefficientArray.Length; i++)
-                m_CoefficientArray[i] = coefficientArray[i];
-
-            for (int i = m_CoefficientArray.Length - 1; i >= 0; i--)
-                if( this[ i ] != 0 ) {
-                    Degree = i;
-                    break;
-                }
-
+            Degree = m_CoefficientArray.Length - 1;
         }
-        public Polynomial(Polynomial obj) {
-            if(obj == null)
-                throw new ArgumentNullException(nameof(obj));
-            m_CoefficientArray = new int[obj.Degree + 1];
-            for (int i = 0; i < obj.m_CoefficientArray.Length; i++)
-                m_CoefficientArray[i] = obj.m_CoefficientArray[i];
-
-            for (int i = m_CoefficientArray.Length - 1; i >= 0; i--)
-                if( this[ i ] != 0 ) {
-                    Degree = i;
-                    break;
-                }
-        }
+        public Polynomial(Polynomial obj): this(obj.m_CoefficientArray) { }
         #endregion
 
         #region Public Methods
@@ -67,28 +81,25 @@ namespace Task1.Polynomial {
         public override string ToString() => $"Polynomial: {GetStringRepresentation()}";
 
         public override bool Equals(object obj) {
-            Polynomial equalObject = obj as Polynomial;
-            if ((object) equalObject == null)
-                return false;
+            if(ReferenceEquals(null, obj)) return false;
+            if(ReferenceEquals(this, obj)) return true;
 
-            return EqualsCoefficientArrays(m_CoefficientArray, ((Polynomial)obj).m_CoefficientArray);
+            return obj.GetType() == GetType() && EqualsCoefficientArrays(m_CoefficientArray, ((Polynomial)obj).m_CoefficientArray);
         }
 
         public bool Equals(Polynomial obj) {
-            if ((object)obj == null)
-                return false;
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
 
             return EqualsCoefficientArrays(m_CoefficientArray, obj.m_CoefficientArray);
         }
-
         public override int GetHashCode() {
             unchecked {
                 return m_CoefficientArray.Aggregate(17, (current, item) => current * 23 + item.GetHashCode());
             }
         }
-
         /// <summary>
-        /// Calculate the value of a polynomial, if the variable is value
+        /// Calculate the value of lhs polynomial, if the variable is value
         /// </summary>
         /// <param name="value">Polynomial's variable</param>
         /// <returns>Value of polynomial</returns>
@@ -99,16 +110,15 @@ namespace Task1.Polynomial {
             
             return result;
         }
-
         /// <summary>
         /// Add monomial to polynomial
         /// </summary>
         /// <param name="coefficient">Coefficient of monomial</param>
         /// <param name="degree">Degree of monomial</param>
         /// <returns>New Polynomial</returns>
-        public Polynomial Add(int coefficient, int degree) {
+        public Polynomial Add(double coefficient, int degree) {
             int tDegree = Math.Max(Degree, degree);
-            int[] tempArray = new int[tDegree + 1];
+            double[] tempArray = new double[tDegree + 1];
 
             if(degree > Degree) {
                 for (int i = 0; i <= Degree; i++)
@@ -127,16 +137,15 @@ namespace Task1.Polynomial {
 
             return new Polynomial(tempArray);
         }
-
         /// <summary>
         /// Myltiply polynomial on monomial
         /// </summary>
         /// <param name="coefficient">Coefficient of monomial</param>
         /// <param name="degree">Degree of monomial</param>
         /// <returns>New polynomial</returns>
-        public Polynomial Multiply(int coefficient, int degree) {
+        public Polynomial Multiply(double coefficient, int degree) {
             int tDegree = Degree + degree;
-            int[] tempArray = new int[tDegree + 1];
+            double[] tempArray = new double[tDegree + 1];
 
             for( int i = 0; i <= tDegree; i++ ) {
                 if( degree > i )
@@ -147,7 +156,6 @@ namespace Task1.Polynomial {
 
             return new Polynomial(tempArray);
         }
-
         /// <summary>
         /// Calculate the sum of two polynomials 
         /// </summary>
@@ -160,10 +168,10 @@ namespace Task1.Polynomial {
             if (b == null)
                 throw new ArgumentNullException(nameof(b));
             int newDegree = Math.Max(a.Degree, b.Degree);
-            int[] tempArray = new int[newDegree + 1];
+            double[] tempArray = new double[newDegree + 1];
 
             for (int i = 0; i <= newDegree; i++) {
-                int temp = 0;
+                double temp = 0;
                 if (i <= a.Degree)
                     temp += a[i];
                 if (i <= b.Degree)
@@ -172,7 +180,6 @@ namespace Task1.Polynomial {
             }
             return new Polynomial(tempArray);
         }
-
         /// <summary>
         /// Calculate the sum of three polynomials 
         /// </summary>
@@ -181,7 +188,6 @@ namespace Task1.Polynomial {
         /// <param name="c">The third summand</param>
         /// <returns>The sum of three polynomials</returns>
         public static Polynomial Add(Polynomial a, Polynomial b, Polynomial c) => Add(Add(a, b), c);
-
         public static Polynomial Add(params Polynomial[] array) {
             if(array == null)    
                 throw new ArgumentNullException(nameof(array));
@@ -198,7 +204,6 @@ namespace Task1.Polynomial {
                     return result;
             }  
         }
-
         /// <summary>
         /// Calculate the diffrence of two polynomials
         /// </summary>
@@ -206,7 +211,6 @@ namespace Task1.Polynomial {
         /// <param name="b">The subtrahend</param>
         /// <returns></returns>
         public static Polynomial Subtraction(Polynomial a, Polynomial b) => a + (-b);
-
         /// <summary>
         /// Multiplies two polynomials
         /// </summary>
@@ -219,14 +223,13 @@ namespace Task1.Polynomial {
             if (b == null)
                 throw new ArgumentNullException(nameof(b));
 
-            Polynomial result = new Polynomial(new int[0]);
+            Polynomial result = new Polynomial(new double[0]);
 
             for( int i = 0; i <= a.Degree ; i++ ) 
                 result += b.Multiply(a[i], i);
             
             return result;
         }
-
         /// <summary>
         /// Multiplies two polynomials
         /// </summary>
@@ -235,7 +238,6 @@ namespace Task1.Polynomial {
         /// <param name="c">The third multiplier</param>
         /// <returns></returns>
         public static Polynomial Multiply(Polynomial a, Polynomial b, Polynomial c) => Multiply(Multiply(a, b), c);
-
         public static Polynomial Multiply(params Polynomial[] array) {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
@@ -255,40 +257,38 @@ namespace Task1.Polynomial {
         #endregion
         
         #region Operators
-        public static bool operator ==(Polynomial a, Polynomial b) {
-            if (object.ReferenceEquals(a, b))
-                return true;
-            if ((object)a == null || (object)b == null)
+        public static bool operator ==(Polynomial lhs, Polynomial rhs) {
+            if (ReferenceEquals(lhs, rhs)) return true;
+            if ((object)lhs == null || (object)rhs == null)
                 return false;
-            return EqualsCoefficientArrays(a.m_CoefficientArray, b.m_CoefficientArray);
+            return EqualsCoefficientArrays(lhs.m_CoefficientArray, rhs.m_CoefficientArray);
         }
 
-        public static bool operator !=(Polynomial a, Polynomial b) => !(a == b);
+        public static bool operator !=(Polynomial lhs, Polynomial rhs) => !(lhs == rhs);
 
-        public static Polynomial operator +(Polynomial a, Polynomial b) => Add(a, b);
+        public static Polynomial operator +(Polynomial lhs, Polynomial rhs) => Add(lhs, rhs);
 
         public static Polynomial operator -(Polynomial a) {
             if(a == null)
                 throw new ArgumentNullException(nameof(a));
-            int[] tempArray = new int[a.Degree + 1];
+            double[] tempArray = new double[a.Degree + 1];
             for( int i = 0; i <= a.Degree; i++)
                 tempArray[ i ] = a[ i ] * (-1);
             
             return new Polynomial(tempArray);
         }
 
-        public static Polynomial operator -(Polynomial a, Polynomial b) => Subtraction(a, b);
+        public static Polynomial operator -(Polynomial lhs, Polynomial rhs) => Subtraction(lhs, rhs);
 
-        public static Polynomial operator *(Polynomial a, Polynomial b) => Multiply(a, b);
+        public static Polynomial operator *(Polynomial lhs, Polynomial rhs) => Multiply(lhs, rhs);
         #endregion
 
         #region Private Methods
-
         private string GetStringRepresentation() {
             StringBuilder @return = new StringBuilder();
 
             for(int i = Degree; i >= 0; i--) {
-                if(m_CoefficientArray[i] == 0)
+                if(Math.Abs(this[i]) < Epsilon)
                     continue;
                 if (i != m_CoefficientArray.Length - 1)
                     @return.Append(" + ");
@@ -299,11 +299,13 @@ namespace Task1.Polynomial {
             return @return.ToString();
         }
 
-        private static bool EqualsCoefficientArrays(int[] array1, int[] array2) {
+        private static bool EqualsCoefficientArrays(double[] array1, double[] array2) {
             IStructuralEquatable array = array1;
 
             return array.Equals(array2, StructuralComparisons.StructuralEqualityComparer);
         }
         #endregion
+
+        #endregion  
     }
 }
